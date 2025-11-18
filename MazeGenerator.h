@@ -27,7 +27,7 @@ class MazeGenerator
 		const int m_total_rows;
 		const int m_total_cols;
 
-		static const int CELL_SIZE = 20;
+		const int CELL_SIZE = 20;
 
 		vector<vector<int>> m_cells;
 		vector<vector<bool>> m_visited;
@@ -37,9 +37,15 @@ class MazeGenerator
 		random_device m_rd;
 		mt19937 m_rand_eng;
 
+		// walls bitmask
+		static constexpr int NORTH = 1;   // 0001
+		static constexpr int SOUTH = 2;   // 0010
+		static constexpr int EAST = 4;   // 0100
+		static constexpr int WEST = 8;   // 1000
+
 	public:
 
-		MazeGenerator(int r, int c);
+		MazeGenerator(int r, int c, int cell_size);
 
 		//~MazeGenerator();
 
@@ -54,5 +60,9 @@ class MazeGenerator
 		bool in_bounds(int r, int c) const; // for later
 
 		void draw_maze(sf::RenderWindow& window);
+
+		void remove_wall(int r1, int c1, int r2, int c2);
+
+		void draw_line(sf::RenderWindow& window, float x1, float y1, float x2, float y2);
 
 };

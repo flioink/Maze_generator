@@ -125,7 +125,8 @@ void MazeGenerator::run_maze_gen(sf::RenderWindow& window)
 void MazeGenerator::draw_maze(sf::RenderWindow& window)
 {
 
-    
+    const float OFFSET = 1.0f;
+    const float WALL_THICKNESS = 4.0f;
 
 
     for (int r = 0; r < m_total_rows; ++r)
@@ -141,18 +142,11 @@ void MazeGenerator::draw_maze(sf::RenderWindow& window)
             float x = c * CELL_SIZE;
             float y = r * CELL_SIZE;
 
-            // TEST: Draw a thick colored rectangle around each cell
-            /*sf::RectangleShape border(sf::Vector2f(CELL_SIZE, CELL_SIZE));
-            border.setPosition(sf::Vector2f(x, y));
-            border.setFillColor(sf::Color::Transparent);
-            border.setOutlineColor(sf::Color::Red);
-            border.setOutlineThickness(2.0f);
-            window.draw(border);*/
-
+            
 
             if (m_visited[r][c])
             {
-                cell.setFillColor(sf::Color::Blue);
+                cell.setFillColor(sf::Color(55, 55, 55));
 
                 int walls = m_cells[r][c];
 
@@ -161,29 +155,36 @@ void MazeGenerator::draw_maze(sf::RenderWindow& window)
                 // NORTH
                 if (walls & NORTH)
                 { 
-                    draw_line(window, x, y - 1, x + CELL_SIZE, y - 1);                   
-                   
+                    //draw_wall_line(window, x, y - 1, x + CELL_SIZE, y - 1); 
+
+                    sf::RectangleShape wall(sf::Vector2f(CELL_SIZE, WALL_THICKNESS));
+                    wall.setPosition({x, y - WALL_THICKNESS / 2});
+                    wall.setFillColor(sf::Color::White);
+                    window.draw(wall);
                 }                              
 
                 // SOUTH
                 /*if (walls & SOUTH)
                 {
-                    draw_line(window, x-1, y + CELL_SIZE - 15, x + CELL_SIZE-15, y + CELL_SIZE);                    
+                    draw_wall_line(window, x - CELL_SIZE, y + CELL_SIZE, x + CELL_SIZE, y + CELL_SIZE - 1);                    
                 }*/
 
-
+                // EAST
                 /*if (walls & EAST)
                 {
                     
-                    draw_line(window, x + CELL_SIZE, y, x + CELL_SIZE, y + CELL_SIZE);                    
+                    draw_wall_line(window, x, y, x, y + CELL_SIZE);                    
                 }*/
 
+                // WEST
                 if (walls & WEST)
-                {
-                    
-                    draw_line(window, x, y, x, y + CELL_SIZE);
+                {                    
+                    //draw_wall_line(window, x, y, x, y + CELL_SIZE);
 
-                    
+                    sf::RectangleShape wall(sf::Vector2f(WALL_THICKNESS, CELL_SIZE));
+                    wall.setPosition({x - WALL_THICKNESS / 2, y});
+                    wall.setFillColor(sf::Color::White);
+                    window.draw(wall);
                 }              
 
 
@@ -261,7 +262,7 @@ void MazeGenerator::remove_wall(int r1, int c1, int r2, int c2)
 
 
 
-void MazeGenerator::draw_line(sf::RenderWindow& window,
+void MazeGenerator::draw_wall_line(sf::RenderWindow& window,
     float x1, float y1, float x2, float y2)
 {
     sf::Vertex line[] =
@@ -273,6 +274,3 @@ void MazeGenerator::draw_line(sf::RenderWindow& window,
     window.draw(line, 2, sf::PrimitiveType::Lines);
 }
 
-
-/*std::bitset<4> binary_mask(walls);
-  std::cout << "Cell (" << r << "," << c << ") walls: " << binary_mask << std::endl;*/

@@ -63,6 +63,8 @@ class MazeGenerator
 
 		void remove_wall(int r1, int c1, int r2, int c2);
 
-		void draw_line(sf::RenderWindow& window, float x1, float y1, float x2, float y2);
+		void draw_wall_line(sf::RenderWindow& window, float x1, float y1, float x2, float y2);
+
+		
 
 };

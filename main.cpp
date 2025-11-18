@@ -6,7 +6,7 @@ int main()
 {
     int rows = 30;
     int cols = 30;
-    int cell_size = 20;
+    int cell_size = 30;
 
     MazeGenerator maze(rows, cols, cell_size);
 

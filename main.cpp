@@ -4,9 +4,9 @@
 
 int main()
 {
-    int rows = 30;
-    int cols = 30;
-    int cell_size = 30;
+    int rows = 35;
+    int cols = 35;
+    int cell_size = 20;
 
     MazeGenerator maze(rows, cols, cell_size);
 
@@ -18,15 +18,15 @@ int main()
     // create the window
     sf::RenderWindow window(sf::VideoMode(screen_dimensions), "Maze");
 
-    // Generate the maze (this does its own drawing)
+   
     maze.run_maze_gen(window);
 
     window.setFramerateLimit(60);
 
-    // Main loop - SIMPLIFIED
+    // main loop
     while (window.isOpen())
     {
-        // Handle events
+        // event handler
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
@@ -35,7 +35,7 @@ int main()
             }
         }
 
-        // Clear and draw ONCE per frame
+        // clear and draw once per frame here:
         window.clear(sf::Color::Black);
         maze.draw_maze(window);
         window.display();

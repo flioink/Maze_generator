@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <stack>
 #include <vector>
 #include <utility>
@@ -17,8 +16,6 @@ using std::pair;
 using std::make_pair;
 using std::mt19937;
 using std::random_device;
-
-
 
 class MazeGenerator
 {
@@ -40,8 +37,8 @@ class MazeGenerator
 		// walls bitmask
 		static constexpr int NORTH = 1;   // 0001
 		static constexpr int SOUTH = 2;   // 0010
-		static constexpr int EAST = 4;   // 0100
-		static constexpr int WEST = 8;   // 1000
+		static constexpr int EAST = 4;    // 0100
+		static constexpr int WEST = 8;    // 1000
 
 	public:
 
@@ -63,8 +60,6 @@ class MazeGenerator
 
 		void remove_wall(int r1, int c1, int r2, int c2);
 
-		void draw_wall_line(sf::RenderWindow& window, float x1, float y1, float x2, float y2);
-
-		
+		void draw_wall_line(sf::RenderWindow& window, float x1, float y1, float x2, float y2);		
 
 };

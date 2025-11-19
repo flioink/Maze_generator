@@ -11,7 +11,7 @@ MazeGenerator::MazeGenerator(int r, int c, int cell_size)
 	:m_total_rows(r),
 	m_total_cols(c),
     CELL_SIZE(cell_size),
-	m_cells(r, vector<int>(c, NORTH | SOUTH | EAST | WEST)),
+	m_cells(r, vector<int>(c, NORTH | SOUTH | EAST | WEST)), // adds up to 1111 binary 
 	m_visited(r, vector<bool>(c, false)),
     m_rand_eng(m_rd())
 {
@@ -88,6 +88,22 @@ void MazeGenerator::run_maze_gen(sf::RenderWindow& window)
 
     while (!m_cell_stack.empty())
     {
+
+
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+            {
+                window.close();
+                return; // exit if window closed
+            }
+        }
+
+        // break on window close
+        if (!window.isOpen()) break;
+
+
+
         auto current = m_cell_stack.top();
         auto neighbors = get_unvisited_neighbors(current.first, current.second);
 
@@ -110,11 +126,11 @@ void MazeGenerator::run_maze_gen(sf::RenderWindow& window)
             draw_maze(window);
             window.display();
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(7)); // TIMING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            std::this_thread::sleep_for(std::chrono::milliseconds(5)); // TIMING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
             //cout << "Drawing at: " << new_cell.first << ", " << new_cell.second << endl;
-
         }
+
         else
         {
             m_cell_stack.pop();
@@ -125,80 +141,65 @@ void MazeGenerator::run_maze_gen(sf::RenderWindow& window)
 void MazeGenerator::draw_maze(sf::RenderWindow& window)
 {
 
-    const float OFFSET = 1.0f;
-    const float WALL_THICKNESS = 4.0f;
+    const float CORNER = static_cast<float>(CELL_SIZE) / 4;
+    const float WALL_THICKNESS = CELL_SIZE / 4;
 
 
-    for (int r = 0; r < m_total_rows; ++r)
+    for (int current_row = 0; current_row < m_total_rows; ++current_row)
     {
-        for (int c = 0; c < m_total_cols; ++c)
+        for (int current_col = 0; current_col < m_total_cols; ++current_col)
         {
             sf::RectangleShape cell(sf::Vector2f(CELL_SIZE, CELL_SIZE));
 
-            sf::Vector2f curr_pos((c * CELL_SIZE), (r * CELL_SIZE));
+            sf::Vector2f curr_pos((current_col * CELL_SIZE), (current_row * CELL_SIZE));
 
             cell.setPosition(curr_pos);
 
-            float x = c * CELL_SIZE;
-            float y = r * CELL_SIZE;
+            // calculate block size
+            float x = current_col * CELL_SIZE;
+            float y = current_row * CELL_SIZE;            
 
-            
-
-            if (m_visited[r][c])
+            if (m_visited[current_row][current_col])
             {
                 cell.setFillColor(sf::Color(55, 55, 55));
 
-                int walls = m_cells[r][c];
-
-
+                int walls = m_cells[current_row][current_col];
                                
                 // NORTH
                 if (walls & NORTH)
                 { 
-                    //draw_wall_line(window, x, y - 1, x + CELL_SIZE, y - 1); 
-
+                    //draw_wall_line(window, x, y - 1, x + CELL_SIZE, y - 1);
                     sf::RectangleShape wall(sf::Vector2f(CELL_SIZE, WALL_THICKNESS));
                     wall.setPosition({x, y - WALL_THICKNESS / 2});
                     wall.setFillColor(sf::Color::White);
-                    window.draw(wall);
+                    window.draw(wall);                    
                 }                              
 
-                // SOUTH
-                /*if (walls & SOUTH)
-                {
-                    draw_wall_line(window, x - CELL_SIZE, y + CELL_SIZE, x + CELL_SIZE, y + CELL_SIZE - 1);                    
-                }*/
-
-                // EAST
-                /*if (walls & EAST)
-                {
-                    
-                    draw_wall_line(window, x, y, x, y + CELL_SIZE);                    
-                }*/
-
+                
                 // WEST
                 if (walls & WEST)
                 {                    
                     //draw_wall_line(window, x, y, x, y + CELL_SIZE);
 
                     sf::RectangleShape wall(sf::Vector2f(WALL_THICKNESS, CELL_SIZE));
-                    wall.setPosition({x - WALL_THICKNESS / 2, y});
+                    wall.setPosition({(x - WALL_THICKNESS / 2), y});
                     wall.setFillColor(sf::Color::White);
                     window.draw(wall);
-                }              
+                }
 
-
+                if ((walls & WEST) && (walls & NORTH)) // patch where north & west meet
+                {
+                    sf::RectangleShape angle_patch(sf::Vector2f(CELL_SIZE / 4, CELL_SIZE / 4));
+                    angle_patch.setPosition({ x - CORNER / 2, y - CORNER / 2});
+                    angle_patch.setFillColor(sf::Color::White);
+                    window.draw(angle_patch);
+                }
             }
 
-                
             else
             {
                 cell.setFillColor(sf::Color::Black);
             }
-                
-
-
-
 
             window.draw(cell);
         }
@@ -212,9 +213,6 @@ void MazeGenerator::remove_wall(int r1, int c1, int r2, int c2)
 {
     int dr = r2 - r1;
     int dc = c2 - c1;
-
-    std::cout << "Removing wall between (" << r1 << "," << c1
-        << ") and (" << r2 << "," << c2 << ")" << std::endl;
 
     if (dr == -1 && dc == 0)
     {
@@ -258,8 +256,6 @@ void MazeGenerator::remove_wall(int r1, int c1, int r2, int c2)
 
     }
 }
-
-
 
 
 void MazeGenerator::draw_wall_line(sf::RenderWindow& window,

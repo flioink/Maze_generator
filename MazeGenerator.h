@@ -60,6 +60,12 @@ class MazeGenerator
 
 		void remove_wall(int r1, int c1, int r2, int c2);
 
-		void draw_wall_line(sf::RenderWindow& window, float x1, float y1, float x2, float y2);		
+		void draw_wall_line(sf::RenderWindow& window, float x1, float y1, float x2, float y2);	
+
+		const vector<vector<int>>& get_cells()const { return m_cells; }
+
+		int get_rows() const { return m_total_rows; }
+
+		int get_cols() const { return m_total_cols; }
 
 };

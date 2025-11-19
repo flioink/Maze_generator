@@ -1,7 +1,7 @@
 #include "MazeGenerator.h"
 
 #include <iostream>
-#include <bitset>
+//#include <bitset>
 
 using std::cout;
 using std::endl;
@@ -126,7 +126,7 @@ void MazeGenerator::run_maze_gen(sf::RenderWindow& window)
             draw_maze(window);
             window.display();
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(5)); // TIMING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            std::this_thread::sleep_for(std::chrono::milliseconds(5)); // USE THIS TO SET THE MAZE BUILDING SPEED!
 
             //cout << "Drawing at: " << new_cell.first << ", " << new_cell.second << endl;
         }
@@ -136,51 +136,48 @@ void MazeGenerator::run_maze_gen(sf::RenderWindow& window)
             m_cell_stack.pop();
         }
     }
+
+    //
 }
 
 void MazeGenerator::draw_maze(sf::RenderWindow& window)
 {
 
-    const float CORNER = static_cast<float>(CELL_SIZE) / 4;
-    const float WALL_THICKNESS = CELL_SIZE / 4;
+    float factor = 3.0f;
+    const float CORNER = static_cast<float>(CELL_SIZE) / factor;
+    const float WALL_THICKNESS = CELL_SIZE / factor;
+    sf::RectangleShape cell(sf::Vector2f(CELL_SIZE, CELL_SIZE)); // create the cell
+    float x, y;
+    sf::Color cell_color(58, 58, 77);
 
 
     for (int current_row = 0; current_row < m_total_rows; ++current_row)
     {
         for (int current_col = 0; current_col < m_total_cols; ++current_col)
         {
-            sf::RectangleShape cell(sf::Vector2f(CELL_SIZE, CELL_SIZE));
+            // get grid position for every cell
+            x = current_col * CELL_SIZE;
+            y = current_row * CELL_SIZE;
 
-            sf::Vector2f curr_pos((current_col * CELL_SIZE), (current_row * CELL_SIZE));
-
-            cell.setPosition(curr_pos);
-
-            // calculate block size
-            float x = current_col * CELL_SIZE;
-            float y = current_row * CELL_SIZE;            
+            cell.setPosition({x, y}); // move in place                    
 
             if (m_visited[current_row][current_col])
             {
-                cell.setFillColor(sf::Color(55, 55, 55));
+                cell.setFillColor(cell_color);
 
                 int walls = m_cells[current_row][current_col];
                                
                 // NORTH
                 if (walls & NORTH)
-                { 
-                    //draw_wall_line(window, x, y - 1, x + CELL_SIZE, y - 1);
+                {                     
                     sf::RectangleShape wall(sf::Vector2f(CELL_SIZE, WALL_THICKNESS));
                     wall.setPosition({x, y - WALL_THICKNESS / 2});
                     wall.setFillColor(sf::Color::White);
                     window.draw(wall);                    
-                }                              
-
-                
+                }                 
                 // WEST
                 if (walls & WEST)
-                {                    
-                    //draw_wall_line(window, x, y, x, y + CELL_SIZE);
-
+                {                       
                     sf::RectangleShape wall(sf::Vector2f(WALL_THICKNESS, CELL_SIZE));
                     wall.setPosition({(x - WALL_THICKNESS / 2), y});
                     wall.setFillColor(sf::Color::White);

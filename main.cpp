@@ -16,7 +16,7 @@ int main()
     sf::Vector2u screen_dimensions(window_width, window_height);
 
     // create the window
-    sf::RenderWindow window(sf::VideoMode(screen_dimensions), "Maze");
+    sf::RenderWindow window(sf::VideoMode(screen_dimensions), "Maze Generator");
 
    
     maze.run_maze_gen(window);

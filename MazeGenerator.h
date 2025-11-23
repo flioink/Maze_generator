@@ -97,6 +97,8 @@ class MazeSolver
 
 		map<pair<int, int>, pair<int, int>> flow_direction;
 
+		vector<pair<int, int>> m_found_path;		
+
 		static constexpr int NORTH = 1;   // 0001
 		static constexpr int SOUTH = 2;   // 0010
 		static constexpr int EAST = 4;    // 0100
@@ -110,6 +112,14 @@ class MazeSolver
 		void solve_maze();
 
 		void flood_paths(sf::RenderWindow& window);
+
+		void reveal_path(sf::RenderWindow& window);
+
+		void store_solved_path(pair<int, int> start, pair<int, int> goal);
+
+		void draw_line_between_cells(sf::RenderWindow& window, const pair<int, int>& first, const pair<int, int>& second);
+
+		void draw_line(sf::RenderWindow& window, float x1, float y1, float x2, float y2);		
 
 		void print_cells_bitmasks(const auto& maze_cells);
 

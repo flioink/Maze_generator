@@ -4,24 +4,28 @@
 
 int main()
 {
-    int rows = 35;
-    int cols = 15;
-    int cell_size = 20;
-
-    MazeGenerator maze(rows, cols, cell_size);
+    int rows = 25;
+    int cols = 35;
+    int cell_size = 30;    
 
     unsigned int window_width = cols * cell_size;
     unsigned int window_height = rows * cell_size;
+    unsigned int utility_area = 100;
 
-    sf::Vector2u screen_dimensions(window_width, window_height);
+    sf::Vector2u screen_dimensions(window_width + utility_area, window_height);
 
     // create the window
-    sf::RenderWindow window(sf::VideoMode(screen_dimensions), "Maze Generator");
+    sf::RenderWindow window(sf::VideoMode(screen_dimensions), "Maze Generator", sf::Style::Close); 
 
-   
-    maze.run_maze_gen(window);
+    // maze generator
+    MazeGenerator maze(rows, cols, cell_size);
+    maze.run_maze_gen(window);  
 
-    window.setFramerateLimit(60);
+    // maze solver
+    MazeSolver solver(maze, cell_size);
+    solver.solve_maze();         
+
+    window.setFramerateLimit(60);     
 
     // main loop
     while (window.isOpen())
@@ -38,6 +42,9 @@ int main()
         // clear and draw once per frame here:
         window.clear(sf::Color::Black);
         maze.draw_maze(window);
+
+        solver.flood_paths(window);
+        
         window.display();
     }
 

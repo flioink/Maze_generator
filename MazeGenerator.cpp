@@ -1,11 +1,21 @@
 #include "MazeGenerator.h"
 
 #include <iostream>
-//#include <bitset>
+#include <bitset>
 
 using std::cout;
 using std::endl;
 
+
+MazeGenerator::MazeGenerator(int r, int c)
+    :m_total_rows(r),
+    m_total_cols(c),
+    m_cells(r, vector<int>(c, NORTH | SOUTH | EAST | WEST)), // adds up to 1111 binary 
+    m_visited(r, vector<bool>(c, false)),
+    m_rand_eng(m_rd())
+{
+    cout << "MazeGenerator constructor with default block size invoked." << endl;
+}
 
 MazeGenerator::MazeGenerator(int r, int c, int cell_size)
 	:m_total_rows(r),
@@ -15,8 +25,10 @@ MazeGenerator::MazeGenerator(int r, int c, int cell_size)
 	m_visited(r, vector<bool>(c, false)),
     m_rand_eng(m_rd())
 {
-    cout << "MazeGenerator constructor invoked." << endl;
+    cout << "MazeGenerator constructor with defined block size invoked." << endl;
 }
+
+
 
 vector<pair<int, int>> MazeGenerator::get_unvisited_neighbors(int r, int c)
 {
@@ -137,7 +149,11 @@ void MazeGenerator::run_maze_gen(sf::RenderWindow& window)
         }
     }
 
-    //
+    //cout << m_cells.size() << endl;
+
+    //print_cells_bitmasks();
+
+    
 }
 
 void MazeGenerator::draw_maze(sf::RenderWindow& window)
@@ -146,10 +162,14 @@ void MazeGenerator::draw_maze(sf::RenderWindow& window)
 
     float factor = 3.0f;
     const float CORNER = static_cast<float>(CELL_SIZE) / factor;
-    const float WALL_THICKNESS = CELL_SIZE / factor;
+    const float WALL_THICKNESS = static_cast<float>(CELL_SIZE / factor);
+    const float OUTLINE_THICKNESS = static_cast<float>(CELL_SIZE / 10.0f);
     
     float x, y;
-    sf::Color bg_color(58, 58, 77);
+    sf::Color bg_color(0, 170, 255);
+    sf::Color wall_color(255, 204, 153);
+
+    sf::Color outline_color(64, 64, 64);
 
     window.clear(bg_color); 
 
@@ -168,34 +188,47 @@ void MazeGenerator::draw_maze(sf::RenderWindow& window)
             {
                 
                 int walls = m_cells[current_row][current_col];
-
-                // NORTH
-                if (walls & NORTH)
-                {
-                    sf::RectangleShape wall(sf::Vector2f(CELL_SIZE, WALL_THICKNESS));
-                    wall.setPosition({ x + wall_fudge_factor, y - WALL_THICKNESS / 2 });
-                    //wall.setPosition({ x, y + CELL_SIZE - WALL_THICKNESS });  // Move INSIDE cell
-
-                    
-                    wall.setFillColor(sf::Color::White);
-                    window.draw(wall);
-                }
+                // current setup works best with north + west wall drawing
+                // south + east also works but without the patching logic
+                
+                
                 // WEST
-                if (walls & WEST)
+                if ((walls & WEST) && !(current_col==0))
                 {
                     sf::RectangleShape wall(sf::Vector2f(WALL_THICKNESS, CELL_SIZE));
-                    wall.setPosition({ (x - WALL_THICKNESS / 2), y + wall_fudge_factor});
-                    //wall.setPosition({ x + CELL_SIZE - WALL_THICKNESS, y });  // Move INSIDE cell
+                    wall.setPosition({(x - WALL_THICKNESS / 2), y + wall_fudge_factor});
+                    wall.setOutlineThickness(OUTLINE_THICKNESS);
+                    wall.setOutlineColor(outline_color);
+                    //wall.setPosition({ x + CELL_SIZE - WALL_THICKNESS, y });  // for east
 
-                    wall.setFillColor(sf::Color::White);
+                    wall.setFillColor(wall_color);
+
                     window.draw(wall);
                 }
 
-                if ((walls & WEST) && (walls & NORTH)) // patch where north & west meet
+                // NORTH
+                if (walls & NORTH && !(current_row == 0))
+                {
+                    sf::RectangleShape wall(sf::Vector2f(CELL_SIZE, WALL_THICKNESS));
+                    wall.setOutlineThickness(OUTLINE_THICKNESS);
+                    wall.setOutlineColor(outline_color);
+
+                    wall.setPosition({x + wall_fudge_factor, y - WALL_THICKNESS / 2});
+                    //wall.setPosition({ x , y + CELL_SIZE - WALL_THICKNESS/2 });  // for south                    
+                    wall.setFillColor(wall_color);
+
+                    window.draw(wall);
+
+                }
+
+                if ((walls & WEST) && (walls & NORTH) && !(current_col == 0)) // patch where north & west meet
                 {
                     sf::RectangleShape angle_patch(sf::Vector2f(CELL_SIZE / 3, CELL_SIZE / 3));
+                    angle_patch.setOutlineThickness(OUTLINE_THICKNESS);
+                    angle_patch.setOutlineColor(outline_color);
+
                     angle_patch.setPosition({ x - CORNER / 2, y - CORNER / 2 });
-                    angle_patch.setFillColor(sf::Color::White);
+                    angle_patch.setFillColor({ 128, 128, 128 });
                     window.draw(angle_patch);
                 }
             }           
@@ -203,48 +236,57 @@ void MazeGenerator::draw_maze(sf::RenderWindow& window)
 
     }
 
-    draw_maze_borders(window);
+    draw_maze_borders(window);    
 }
 
-void MazeGenerator::remove_wall(int row1, int col1, int row2, int col2)
+void MazeGenerator::print_cells_bitmasks()
 {
-    int delta_row = row2 - row1; //delta row
-    int delta_col = col2 - col1; // delta column
+    for (int i = 0; i < m_total_rows; ++i)
+    {
+        for (int j = 0; j < m_total_cols; ++j)
+        {
+            cout << "Bitmask on m_cells from MazeGenerator: " << i << ", " << j << " : " << std::bitset<4>(m_cells[i][j]) << std::endl;
+        }
+    }
+}
+
+void MazeGenerator::remove_wall(int prev_row, int prev_col, int curr_row, int curr_col)
+{
+    int delta_row = curr_row - prev_row; //delta row
+    int delta_col = curr_col - prev_col; // delta column
 
     if (delta_row == -1 && delta_col == 0)
     {
         // neighbor is north
-        m_cells[row1][col1] &= ~NORTH;
-        m_cells[row2][col2] &= ~SOUTH;
+        m_cells[prev_row][prev_col] &= ~NORTH;
+        m_cells[curr_row][curr_col] &= ~SOUTH;
         //cout << "North bitmask ^ " << endl;
     }
 
     else if (delta_row == 1 && delta_col == 0)
     {
         // neighbor is south
-        m_cells[row1][col1] &= ~SOUTH;
-        m_cells[row2][col2] &= ~NORTH;
-        //cout << "South bitmask V" << endl;
+        m_cells[prev_row][prev_col] &= ~SOUTH;
+        m_cells[curr_row][curr_col] &= ~NORTH;
+        //cout << "South bitmask v" << endl;
     }
 
     else if (delta_row == 0 && delta_col == 1)
     {
         // neighbor is east
-        m_cells[row1][col1] &= ~EAST;
-        m_cells[row2][col2] &= ~WEST;
+        m_cells[prev_row][prev_col] &= ~EAST;
+        m_cells[curr_row][curr_col] &= ~WEST;
         //cout << "East bitmask >" << endl;
     }
 
     else if (delta_row == 0 && delta_col == -1)
     {
         // neighbor is west
-        m_cells[row1][col1] &= ~WEST;
-        m_cells[row2][col2] &= ~EAST;
+        m_cells[prev_row][prev_col] &= ~WEST;
+        m_cells[curr_row][curr_col] &= ~EAST;
         //cout << "West bitmask <" << endl;
     }
 }
-
-
 
 
 
@@ -253,31 +295,191 @@ void MazeGenerator::draw_maze_borders(sf::RenderWindow& window)
     float frame_w = CELL_SIZE / 4.0f;
     float h = m_total_rows * CELL_SIZE;
 
-    sf::Color frame_color(sf::Color::Cyan);    
+    sf::Color frame_color(128, 0, 0);    
 
-    sf::RectangleShape frame_left(sf::Vector2f(frame_w, h));
+    sf::RectangleShape border_left(sf::Vector2f(frame_w, h));
     
     // left
-    frame_left.setPosition({ 0, float(CELL_SIZE) }); // 0,0 opening
-    frame_left.setFillColor(frame_color);
-    window.draw(frame_left);
+    border_left.setPosition({ 0, 0}); // 0,0 opening
+    border_left.setFillColor(frame_color);
+    window.draw(border_left);
 
     // right
-    sf::RectangleShape frame_right(sf::Vector2f(m_total_cols * CELL_SIZE - frame_w, h - CELL_SIZE));
-    frame_right.setPosition({ float(m_total_cols * CELL_SIZE - frame_w), 0});
-    frame_right.setFillColor(frame_color);
-    window.draw(frame_right);
-
-    // bottom
-    sf::RectangleShape frame_bottom(sf::Vector2f(m_total_cols * CELL_SIZE - CELL_SIZE, h));
-    frame_bottom.setPosition({0, float(m_total_rows * CELL_SIZE - frame_w) });
-    frame_bottom.setFillColor(frame_color);
-    window.draw(frame_bottom);
+    sf::RectangleShape border_right(sf::Vector2f(frame_w, h));
+    border_right.setPosition({ float(m_total_cols * CELL_SIZE - frame_w), 0});
+    border_right.setFillColor(frame_color);
+    window.draw(border_right);    
 
     // top
-    sf::RectangleShape frame_top(sf::Vector2f(m_total_cols * CELL_SIZE - CELL_SIZE, frame_w));
-    frame_top.setPosition({ float(CELL_SIZE), 0 }); // Skip first cell for entrance
-    frame_top.setFillColor(frame_color);
-    window.draw(frame_top);
+    sf::RectangleShape border_top(sf::Vector2f(m_total_cols * CELL_SIZE, frame_w));
+    border_top.setPosition({ 0, 0 });
+    border_top.setFillColor(frame_color);
+    window.draw(border_top);
 
+    // bottom
+    sf::RectangleShape border_bottom(sf::Vector2f(m_total_cols * CELL_SIZE, h));
+    border_bottom.setPosition({ 0, float(m_total_rows * CELL_SIZE - frame_w) });
+    border_bottom.setFillColor(frame_color);
+    window.draw(border_bottom);
+
+    sf::Color bg_color(0, 170, 255);
+
+    // entrance
+    sf::RectangleShape entrance(sf::Vector2f(CELL_SIZE / 2, CELL_SIZE / 2));    
+    entrance.setPosition({0, 0});
+    entrance.setFillColor(bg_color);
+    entrance.setOutlineThickness(4);
+    entrance.setOutlineColor(sf::Color::Cyan);
+    window.draw(entrance);
+
+    // exit
+    sf::RectangleShape exit(sf::Vector2f(CELL_SIZE / 2, CELL_SIZE / 2));
+    exit.setPosition({ float(m_total_cols * CELL_SIZE - CELL_SIZE / 2), h - CELL_SIZE/2});
+    exit.setFillColor(bg_color);
+    exit.setOutlineThickness(4);
+    exit.setOutlineColor(sf::Color::Green);
+    window.draw(exit);
+
+    // black area
+    sf::RectangleShape utility_area(sf::Vector2f(frame_w * CELL_SIZE, h));
+    utility_area.setPosition({float(m_total_cols * CELL_SIZE), 0 });
+    utility_area.setFillColor(sf::Color(0, 0, 0));
+    window.draw(utility_area);
+
+}
+
+
+// Solver class
+MazeSolver::MazeSolver(MazeGenerator& maze_gen):
+    m_maze_generator(maze_gen)
+{
+    cout << "Maze solver constructor called" << endl;
+}
+
+MazeSolver::MazeSolver(MazeGenerator& maze_gen, int cell_size) :
+    m_maze_generator(maze_gen), CELL_SIZE(cell_size)
+{
+    cout << "Maze solver constructor called" << endl;
+}
+
+void MazeSolver::solve_maze()
+{
+
+    int maze_rows = m_maze_generator.get_rows();
+    int maze_cols = m_maze_generator.get_cols();
+
+    pair<int, int> start(0, 0); // top left
+    pair<int, int> goal(maze_rows - 1, maze_cols - 1); 
+
+    const auto& maze_cells = m_maze_generator.get_cells();
+
+    print_cells_bitmasks(maze_cells);
+
+    m_hose.push(start);
+    m_wet_areas.insert(start);
+    flow_direction[start] = start; // water started here
+
+
+    while (!m_hose.empty())
+    {
+        auto current = m_hose.front();
+        m_hose.pop();
+
+        if (current == goal)
+        {
+            // trace back through flow_direction to build path, later
+        }
+
+        int r = current.first;
+        int c = current.second;
+        int walls = maze_cells[r][c];  // get wall bitmask for current cell
+
+        if (!(walls & NORTH) && r > 0 )
+        {
+            pair<int, int> neighbor(r - 1, c);
+
+            
+            if (m_wet_areas.find(neighbor) == m_wet_areas.end())
+            {
+                m_wet_areas.insert(neighbor);
+                flow_direction[neighbor] = current;
+                m_hose.push(neighbor);
+            }
+        }
+
+        if (!(walls & SOUTH) && r < maze_rows - 1 )
+        {
+            pair<int, int> neighbor(r + 1, c);
+
+            
+            if (m_wet_areas.find(neighbor) == m_wet_areas.end())
+            {
+                m_wet_areas.insert(neighbor);
+                flow_direction[neighbor] = current;
+                m_hose.push(neighbor);
+            }
+        }
+
+        if (!(walls & EAST) && c < maze_cols - 1 )
+        {
+            pair<int, int> neighbor(r, c + 1);
+
+            
+            if (m_wet_areas.find(neighbor) == m_wet_areas.end())
+            {
+                m_wet_areas.insert(neighbor);
+                flow_direction[neighbor] = current;
+                m_hose.push(neighbor);
+            }
+        }
+
+        if (!(walls & WEST) && c > 0 )
+        {
+            pair<int, int> neighbor(r, c - 1);
+
+            
+            if (m_wet_areas.find(neighbor) == m_wet_areas.end())
+            {
+                m_wet_areas.insert(neighbor);
+                flow_direction[neighbor] = current;
+                m_hose.push(neighbor);
+            }
+        }
+
+        
+    }
+}
+
+
+
+void MazeSolver::print_cells_bitmasks(const auto& maze_cells)
+{
+    for (size_t r = 0; r < maze_cells.size(); ++r)
+    {
+        for (size_t c = 0; c < maze_cells[r].size(); ++c)
+        {
+            std::cout << "Cell (" << r << "," << c << ") bitmask: "
+                << std::bitset<4>(maze_cells[r][c]) << std::endl;
+        }
+    }
+}
+
+
+void MazeSolver::flood_paths(sf::RenderWindow& window)
+{
+    //std::cout << "Drawing " << m_wet_areas.size() << " wet cells" << std::endl;
+
+    for (auto& cell : m_wet_areas)
+    {
+        int r = cell.first;
+        int c = cell.second;
+
+        float x = c * CELL_SIZE + CELL_SIZE / 3;
+        float y = r * CELL_SIZE + CELL_SIZE / 3;        
+
+        sf::CircleShape water_drop(CELL_SIZE / 7);
+        water_drop.setPosition({ x, y });
+        water_drop.setFillColor(sf::Color::Blue);
+        window.draw(water_drop);        
+    }
 }

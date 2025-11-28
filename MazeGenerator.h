@@ -135,6 +135,11 @@ class MazeSolver
 
 		void set_selection(int y, int x, sf::RenderWindow& window);
 
-		
+		const pair<int, int> get_start_pos() { return m_start_pos; }
+
+		const pair<int, int> get_end_pos() { return m_end_pos; }
+
+		void reset_selected_start() { m_selected_start = false; }
+		void reset_selected_end() { m_selected_end = false; }
 
 };

@@ -27,7 +27,7 @@ int main()
     // maze solver
     MazeSolver solver(maze, cell_size);
 
-    solver.solve_maze(0, 0, window_height / cell_size - 1, window_width/cell_size - 1);
+    solver.solve_maze(0, 0, window_height / cell_size - 3, window_width/cell_size - 3);
 
     window.setFramerateLimit(60);
 
@@ -57,7 +57,13 @@ int main()
 
                     solver.set_selection(current_y, current_x, window);
 
-                    
+                    //solver.solve_maze(solver.get_start_pos().first, solver.get_start_pos().second, solver.get_end_pos().first, solver.get_end_pos().second);
+                }
+
+                if(mouseButtonPressed->button == sf::Mouse::Button::Right)
+                {
+                    solver.reset_selected_start();
+                    solver.reset_selected_end();
                 }
             }
         }

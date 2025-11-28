@@ -2,6 +2,9 @@
 #include "MazeGenerator.h"
 #include <iostream>
 
+
+// use mainCRTStartup in project_name->properties->linker->advanced->entry point to be able to remove the console window on startup
+
 int main()
 {
     int rows = 25;
@@ -23,7 +26,8 @@ int main()
 
     // maze solver
     MazeSolver solver(maze, cell_size);
-    solver.solve_maze();         
+
+    solver.solve_maze(0, 0, window_height / cell_size - 1, window_width/cell_size - 1);
 
     window.setFramerateLimit(60);
 
@@ -38,15 +42,34 @@ int main()
             {
                 window.close();
             }
+
+            if (const auto* mouseButtonPressed = event->getIf<sf::Event::MouseButtonPressed>())
+            {
+                if (mouseButtonPressed->button == sf::Mouse::Button::Left)
+                {
+
+                    int current_x = mouseButtonPressed->position.x;
+                    int current_y = mouseButtonPressed->position.y;
+
+                    /*std::cout << "the left button was pressed" << std::endl;
+                    std::cout << "mouse x: " << current_x << std::endl;
+                    std::cout << "mouse y: " << current_y << std::endl;*/
+
+                    solver.set_selection(current_y, current_x, window);
+
+                    
+                }
+            }
         }
 
         // clear and draw once per frame here:
         
-
-        
         maze.draw_maze(window);        
 
         solver.reveal_path(window);
+
+        solver.redraw_start(window);
+        solver.redraw_end(window);
         
         window.display();
     }

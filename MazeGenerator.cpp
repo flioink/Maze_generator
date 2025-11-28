@@ -20,11 +20,11 @@ MazeGenerator::MazeGenerator(int r, int c)
 
 
 MazeGenerator::MazeGenerator(int r, int c, int cell_size)
-	:m_total_rows(r),
-	m_total_cols(c),
+    :m_total_rows(r),
+    m_total_cols(c),
     CELL_SIZE(cell_size),
-	m_cells(r, vector<int>(c, NORTH | SOUTH | EAST | WEST)), // adds up to 1111 binary 
-	m_visited(r, vector<bool>(c, false)),
+    m_cells(r, vector<int>(c, NORTH | SOUTH | EAST | WEST)), // adds up to 1111 binary 
+    m_visited(r, vector<bool>(c, false)),
     m_rand_eng(m_rd())
 {
     cout << "MazeGenerator constructor with defined block size invoked." << endl;
@@ -76,8 +76,8 @@ vector<pair<int, int>> MazeGenerator::get_unvisited_neighbors(int r, int c)
 
 
 pair<int, int> MazeGenerator::pick_random_neighbor(const vector<pair<int, int>>& neighbors)
-{    
-   
+{
+
     std::uniform_int_distribution<> distribution(0, neighbors.size() - 1);
     return neighbors[distribution(m_rand_eng)];
 }
@@ -85,9 +85,9 @@ pair<int, int> MazeGenerator::pick_random_neighbor(const vector<pair<int, int>>&
 
 void MazeGenerator::run_maze_gen(sf::RenderWindow& window)
 {
-    cout << "MazeGenerator run_maze_gen invoked." << endl;    
+    cout << "MazeGenerator run_maze_gen invoked." << endl;
 
-    pair<int, int> first_cell = {0, 0}; // initialize at 0,0
+    pair<int, int> first_cell = { 0, 0 }; // initialize at 0,0
 
     m_visited[0][0] = true; // mark it visited
 
@@ -120,13 +120,13 @@ void MazeGenerator::run_maze_gen(sf::RenderWindow& window)
 
             m_cell_stack.push(new_cell); // push the new cell on top
 
-            
+
             // draw logic
-            window.clear();            
+            window.clear();
             draw_maze(window);
             window.display();
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(1)); // USE THIS TO SET THE MAZE BUILDING SPEED!            
+            //std::this_thread::sleep_for(std::chrono::milliseconds(1)); // USE THIS TO SET THE MAZE BUILDING SPEED!            
         }
 
         else
@@ -134,19 +134,19 @@ void MazeGenerator::run_maze_gen(sf::RenderWindow& window)
             // if no neighbors are found pop the top of the stack until a cell with neighbors is found or the stack is empty
             m_cell_stack.pop();
         }
-    }    
+    }
 }
 
 
 void MazeGenerator::draw_maze(sf::RenderWindow& window)
 {
-    
+
 
     float factor = 3.0f;
     const float CORNER = static_cast<float>(CELL_SIZE) / factor;
     const float WALL_THICKNESS = static_cast<float>(CELL_SIZE / factor);
     const float OUTLINE_THICKNESS = static_cast<float>(CELL_SIZE / 10.0f);
-    
+
     float x, y;
     //sf::Color bg_color(0, 170, 255);
     sf::Color bg_color(0, 66, 66);
@@ -155,7 +155,7 @@ void MazeGenerator::draw_maze(sf::RenderWindow& window)
     //sf::Color wall_outline_color(64, 64, 64);
     sf::Color wall_outline_color(128, 128, 128);
 
-    window.clear(bg_color); 
+    window.clear(bg_color);
 
     float wall_fudge_factor = static_cast<float>(CELL_SIZE / 6);
 
@@ -166,21 +166,21 @@ void MazeGenerator::draw_maze(sf::RenderWindow& window)
         {
             // get grid position for every cell
             x = current_col * CELL_SIZE;
-            y = current_row * CELL_SIZE;                          
+            y = current_row * CELL_SIZE;
 
             if (m_visited[current_row][current_col])
             {
-                
+
                 int walls = m_cells[current_row][current_col];
                 // current setup works best with north + west wall drawing
                 // south + east also works but without the patching logic
-                
-                
+
+
                 // WEST
-                if ((walls & WEST) && !(current_col==0))
+                if ((walls & WEST) && !(current_col == 0))
                 {
                     sf::RectangleShape wall(sf::Vector2f(WALL_THICKNESS, CELL_SIZE));
-                    wall.setPosition({(x - WALL_THICKNESS / 2), y + wall_fudge_factor});
+                    wall.setPosition({ (x - WALL_THICKNESS / 2), y + wall_fudge_factor });
                     wall.setOutlineThickness(OUTLINE_THICKNESS);
                     wall.setOutlineColor(wall_outline_color);
                     //wall.setPosition({ x + CELL_SIZE - WALL_THICKNESS, y });  // for east
@@ -197,7 +197,7 @@ void MazeGenerator::draw_maze(sf::RenderWindow& window)
                     wall.setOutlineThickness(OUTLINE_THICKNESS);
                     wall.setOutlineColor(wall_outline_color);
 
-                    wall.setPosition({x + wall_fudge_factor, y - WALL_THICKNESS / 2});
+                    wall.setPosition({ x + wall_fudge_factor, y - WALL_THICKNESS / 2 });
                     //wall.setPosition({ x , y + CELL_SIZE - WALL_THICKNESS/2 });  // for south                    
                     wall.setFillColor(wall_color);
 
@@ -215,11 +215,11 @@ void MazeGenerator::draw_maze(sf::RenderWindow& window)
                     angle_patch.setFillColor({ 128, 128, 128 });
                     window.draw(angle_patch);
                 }
-            }           
+            }
         }
     }
 
-    draw_maze_borders(window);    
+    draw_maze_borders(window);
 }
 
 
@@ -279,20 +279,20 @@ void MazeGenerator::draw_maze_borders(sf::RenderWindow& window)
     float frame_w = CELL_SIZE / 4.0f;
     float h = m_total_rows * CELL_SIZE;
 
-    sf::Color frame_color(128, 0, 0);    
+    sf::Color frame_color(128, 0, 0);
 
     sf::RectangleShape border_left(sf::Vector2f(frame_w, h));
-    
+
     // left
-    border_left.setPosition({ 0, 0}); // 0,0 opening
+    border_left.setPosition({ 0, 0 }); // 0,0 opening
     border_left.setFillColor(frame_color);
     window.draw(border_left);
 
     // right
     sf::RectangleShape border_right(sf::Vector2f(frame_w, h));
-    border_right.setPosition({ float(m_total_cols * CELL_SIZE - frame_w), 0});
+    border_right.setPosition({ float(m_total_cols * CELL_SIZE - frame_w), 0 });
     border_right.setFillColor(frame_color);
-    window.draw(border_right);    
+    window.draw(border_right);
 
     // top
     sf::RectangleShape border_top(sf::Vector2f(m_total_cols * CELL_SIZE, frame_w));
@@ -308,21 +308,21 @@ void MazeGenerator::draw_maze_borders(sf::RenderWindow& window)
 
     sf::Color bg_color(0, 170, 255);
 
-    // entrance
-    sf::RectangleShape entrance(sf::Vector2f(CELL_SIZE / 2, CELL_SIZE / 2));    
-    entrance.setPosition({0, 0});
-    entrance.setFillColor(bg_color);
-    entrance.setOutlineThickness(4);
-    entrance.setOutlineColor(sf::Color::Cyan);
-    window.draw(entrance);
+    //// entrance
+    //sf::RectangleShape entrance(sf::Vector2f(CELL_SIZE / 2, CELL_SIZE / 2));
+    //entrance.setPosition({ 0, 0 });
+    //entrance.setFillColor(bg_color);
+    //entrance.setOutlineThickness(4);
+    //entrance.setOutlineColor(sf::Color::Cyan);
+    //window.draw(entrance);
 
-    // exit
-    sf::RectangleShape exit(sf::Vector2f(CELL_SIZE / 2, CELL_SIZE / 2));
-    exit.setPosition({ float(m_total_cols * CELL_SIZE - CELL_SIZE / 2), h - CELL_SIZE/2});
-    exit.setFillColor(bg_color);
-    exit.setOutlineThickness(4);
-    exit.setOutlineColor(sf::Color::Green);
-    window.draw(exit);
+    //// exit
+    //sf::RectangleShape exit(sf::Vector2f(CELL_SIZE / 2, CELL_SIZE / 2));
+    //exit.setPosition({ float(m_total_cols * CELL_SIZE - CELL_SIZE / 2), h - CELL_SIZE / 2 });
+    //exit.setFillColor(bg_color);
+    //exit.setOutlineThickness(4);
+    //exit.setOutlineColor(sf::Color::Green);
+    //window.draw(exit);
 
     // black area
     /*sf::RectangleShape utility_area(sf::Vector2f(frame_w * CELL_SIZE, h));
@@ -334,7 +334,7 @@ void MazeGenerator::draw_maze_borders(sf::RenderWindow& window)
 
 
 // SOLVER CLASS
-MazeSolver::MazeSolver(MazeGenerator& maze_gen):
+MazeSolver::MazeSolver(MazeGenerator& maze_gen) :
     m_maze_generator(maze_gen)
 {
     cout << "Maze solver constructor called" << endl;
@@ -348,22 +348,22 @@ MazeSolver::MazeSolver(MazeGenerator& maze_gen, int cell_size) :
 }
 
 
-void MazeSolver::solve_maze()
+void MazeSolver::solve_maze(int start_y, int start_x, int end_y, int end_x)
 {
 
     int maze_rows = m_maze_generator.get_rows();
-    int maze_cols = m_maze_generator.get_cols();
+    int maze_cols = m_maze_generator.get_cols();    
 
-    pair<int, int> start(0, 0); // top left
-    pair<int, int> goal(maze_rows - 1, maze_cols - 1); 
+    m_start_pos = make_pair(start_y, start_x); // y/x
+    m_end_pos = make_pair(end_y, end_x);
 
     const auto& maze_cells = m_maze_generator.get_cells();
 
     //print_cells_bitmasks(maze_cells);
 
-    m_hose.push(start);
-    m_wet_areas.insert(start);
-    flow_direction[start] = start; // started here
+    m_hose.push(m_start_pos);
+    m_wet_areas.insert(m_start_pos);
+    flow_direction[m_start_pos] = m_start_pos; // started here
 
 
     while (!m_hose.empty())
@@ -371,11 +371,13 @@ void MazeSolver::solve_maze()
         auto current = m_hose.front();
         m_hose.pop();
 
-        if (current == goal)
+        if (current == m_end_pos)
         {
             // trace back through flow_direction to build path
 
-            store_solved_path(start, goal);
+            store_solved_path(m_start_pos, m_end_pos);
+
+            return;
         }
 
         int r = current.first;
@@ -386,7 +388,7 @@ void MazeSolver::solve_maze()
         {
             pair<int, int> neighbor(r - 1, c);
 
-            
+
             if (m_wet_areas.find(neighbor) == m_wet_areas.end())
             {
                 m_wet_areas.insert(neighbor);
@@ -399,7 +401,7 @@ void MazeSolver::solve_maze()
         {
             pair<int, int> neighbor(r + 1, c);
 
-            
+
             if (m_wet_areas.find(neighbor) == m_wet_areas.end())
             {
                 m_wet_areas.insert(neighbor);
@@ -412,7 +414,7 @@ void MazeSolver::solve_maze()
         {
             pair<int, int> neighbor(r, c + 1);
 
-            
+
             if (m_wet_areas.find(neighbor) == m_wet_areas.end())
             {
                 m_wet_areas.insert(neighbor);
@@ -425,14 +427,14 @@ void MazeSolver::solve_maze()
         {
             pair<int, int> neighbor(r, c - 1);
 
-            
+
             if (m_wet_areas.find(neighbor) == m_wet_areas.end())
             {
                 m_wet_areas.insert(neighbor);
                 flow_direction[neighbor] = current;
                 m_hose.push(neighbor);
             }
-        }        
+        }
     }
 }
 
@@ -468,7 +470,7 @@ void MazeSolver::flood_paths(sf::RenderWindow& window)
         sf::CircleShape water_drop(CELL_SIZE / 9);
         water_drop.setPosition({ x, y });
         water_drop.setFillColor(sf::Color::Blue);
-        window.draw(water_drop);        
+        window.draw(water_drop);
     }
 }
 
@@ -483,10 +485,10 @@ void MazeSolver::reveal_path(sf::RenderWindow& window)
         auto& first_point = m_found_path[i];
         auto& second_point = m_found_path[i + 1];
 
-        draw_line_between_cells(window, first_point, second_point);        
-    }    
-        
-    
+        draw_line_between_cells(window, first_point, second_point);
+    }
+
+
 
     for (auto& cell : m_found_path) // draw dots
     {
@@ -505,11 +507,11 @@ void MazeSolver::reveal_path(sf::RenderWindow& window)
 
 
 void MazeSolver::store_solved_path(pair<int, int> start, pair<int, int> goal)
-{       
+{
     pair<int, int> step = goal;
 
     // trace back to start
-    while (step != start) 
+    while (step != start)
     {
         m_found_path.push_back(step);
 
@@ -520,18 +522,20 @@ void MazeSolver::store_solved_path(pair<int, int> start, pair<int, int> goal)
 
     // reverse to get start goal order
     reverse(m_found_path.begin(), m_found_path.end()); // vor visualization mostly
-           
+
 }
 
 
 void MazeSolver::draw_line_between_cells(sf::RenderWindow& window, const pair<int, int>& first, const pair<int, int>& second)
 {
-    int nudge = CELL_SIZE / 8;    
+    int nudge = CELL_SIZE / 8;
 
-    float x1 = first.second * CELL_SIZE + CELL_SIZE / 2 + nudge;  // center of cell
     float y1 = first.first * CELL_SIZE + CELL_SIZE / 2 + nudge;
-    float x2 = second.second * CELL_SIZE + CELL_SIZE / 2;
+    float x1 = first.second * CELL_SIZE + CELL_SIZE / 2 + nudge;  // center of cell
+    
     float y2 = second.first * CELL_SIZE + CELL_SIZE / 2;
+    float x2 = second.second * CELL_SIZE + CELL_SIZE / 2;
+    
 
     draw_line(window, x1, y1, x2, y2);
 
@@ -549,4 +553,82 @@ void MazeSolver::draw_line(sf::RenderWindow& window, float x1, float y1, float x
     window.draw(line, 2, sf::PrimitiveType::Lines);
 }
 
+void MazeSolver::set_selection(int y, int x, sf::RenderWindow& window)
+{
+    int cell_index_y = y / CELL_SIZE;
+    int cell_index_x = x / CELL_SIZE;    
 
+    int rows = m_maze_generator.get_rows();
+    int cols = m_maze_generator.get_cols();
+
+    if (cell_index_x < 0 || cell_index_x >= cols || cell_index_y < 0 || cell_index_y >= rows)
+    {
+        return;
+    }
+
+    if (!m_selected_start)
+    {
+        m_selected_start = true;
+        m_start_pos = make_pair(cell_index_x, cell_index_y);
+
+        cout << "Start selected at " << cell_index_x << ", " << cell_index_y << endl;
+
+        cout << CELL_SIZE << ", " << m_maze_generator.get_cell_size() << endl; // check is block size matches        
+
+        return;
+    }
+
+    // wall avoiding will be figured later
+
+    if (!m_selected_end)
+    {
+        if (cell_index_x == m_start_pos.first && cell_index_y == m_start_pos.second)
+        {
+            cout << "End position cannot match start position." << endl;
+            return;
+        }
+
+        else
+        {
+            m_end_pos = make_pair(cell_index_x, cell_index_y);
+
+            m_selected_end = true;
+            cout << "End selected at " << cell_index_x << ", " << cell_index_y << endl;
+            return;
+        }
+    }
+}
+
+
+void MazeSolver::redraw_start(sf::RenderWindow& window)
+{
+
+    //cout << "Draw entrance called" << endl;
+
+    sf::RectangleShape entrance(sf::Vector2f(CELL_SIZE / 4, CELL_SIZE / 4));
+    sf::Vector2f entry_pos(static_cast<float>(m_start_pos.first * CELL_SIZE + CELL_SIZE / 3),
+        static_cast<float>(m_start_pos.second * CELL_SIZE + CELL_SIZE / 3));
+    entrance.setPosition(entry_pos);
+    entrance.setFillColor({ 0, 255, 0 });
+    entrance.setOutlineThickness(4);
+    entrance.setOutlineColor(sf::Color::Cyan);
+    window.draw(entrance);
+}
+
+
+void MazeSolver::redraw_end(sf::RenderWindow& window)
+{
+
+    //cout << "Draw exit called" << endl;
+
+    sf::RectangleShape exit(sf::Vector2f(CELL_SIZE / 4, CELL_SIZE / 4));
+
+    sf::Vector2f exit_pos(static_cast<float>(m_end_pos.first * CELL_SIZE + CELL_SIZE / 3),
+        static_cast<float>(m_end_pos.second * CELL_SIZE + CELL_SIZE / 3));
+
+    exit.setPosition(exit_pos);
+    exit.setFillColor({ 0, 0, 255 });
+    exit.setOutlineThickness(4);
+    exit.setOutlineColor(sf::Color::Red);
+    window.draw(exit);
+}

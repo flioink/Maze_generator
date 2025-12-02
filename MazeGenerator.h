@@ -140,6 +140,11 @@ class MazeSolver
 		const pair<int, int> get_end_pos() { return m_end_pos; }
 
 		void reset_selected_start() { m_selected_start = false; }
+
 		void reset_selected_end() { m_selected_end = false; }
+
+		bool is_start_selected() const{ return m_selected_start; }
+
+		bool is_end_selected() const{ return m_selected_end; }
 
 };

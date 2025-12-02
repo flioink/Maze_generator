@@ -8,7 +8,7 @@
 int main()
 {
     int rows = 25;
-    int cols = 15;
+    int cols = 25;
     int cell_size = 30;    
 
     unsigned int window_width = cols * cell_size;
@@ -27,7 +27,7 @@ int main()
     // maze solver
     MazeSolver solver(maze, cell_size);
 
-    solver.solve_maze(0, 0, window_height / cell_size - 3, window_width/cell_size - 3);
+    //solver.solve_maze(0, 0, window_height / cell_size - 3, window_width/cell_size - 3);
 
     window.setFramerateLimit(60);
 
@@ -70,12 +70,22 @@ int main()
 
         // clear and draw once per frame here:
         
-        maze.draw_maze(window);        
+        maze.draw_maze(window);
+        
+        if (solver.is_start_selected() && solver.is_end_selected())
+        {
+            solver.reveal_path(window);
+        }
 
-        solver.reveal_path(window);
+        if (solver.is_start_selected())
+        {
+            solver.redraw_start(window);
+        }
 
-        solver.redraw_start(window);
-        solver.redraw_end(window);
+        if (solver.is_end_selected())
+        {
+            solver.redraw_end(window);
+        }        
         
         window.display();
     }

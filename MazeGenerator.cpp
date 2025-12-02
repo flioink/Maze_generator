@@ -237,7 +237,7 @@ void MazeGenerator::print_cells_bitmasks() // for diagnostics
 
 void MazeGenerator::remove_wall(int prev_row, int prev_col, int curr_row, int curr_col)
 {
-    int delta_row = curr_row - prev_row; //delta row
+    int delta_row = curr_row - prev_row; // delta row
     int delta_col = curr_col - prev_col; // delta column
 
     if (delta_row == -1 && delta_col == 0)
@@ -365,7 +365,7 @@ void MazeSolver::solve_maze(int start_y, int start_x, int end_y, int end_x)
 
             store_solved_path(m_start_pos, m_end_pos);
 
-            return;
+            break;
         }
 
         int r = current.first;
@@ -474,9 +474,7 @@ void MazeSolver::reveal_path(sf::RenderWindow& window)
         auto& second_point = m_found_path[i + 1];
 
         draw_line_between_cells(window, first_point, second_point);
-    }
-
-
+    }    
 
     for (auto& cell : m_found_path) // draw dots
     {
@@ -485,10 +483,12 @@ void MazeSolver::reveal_path(sf::RenderWindow& window)
 
         float x = c * CELL_SIZE + visual_offset + nudge;
         float y = r * CELL_SIZE + visual_offset + nudge;
-
+        
         sf::CircleShape position_dot(CELL_SIZE / 9);
-        position_dot.setPosition({ x, y });
-        position_dot.setFillColor(sf::Color::Magenta);
+        position_dot.setPosition({ x, y });        
+        
+        position_dot.setFillColor(sf::Color::Magenta);        
+
         window.draw(position_dot);
     }
 }
@@ -541,6 +541,7 @@ void MazeSolver::draw_line(sf::RenderWindow& window, float x1, float y1, float x
     window.draw(line, 2, sf::PrimitiveType::Lines);
 }
 
+
 void MazeSolver::set_selection(int y, int x, sf::RenderWindow& window)
 {
     int cell_index_y = y / CELL_SIZE;
@@ -559,33 +560,29 @@ void MazeSolver::set_selection(int y, int x, sf::RenderWindow& window)
         m_selected_start = true;
         m_start_pos = make_pair(cell_index_y, cell_index_x);
 
-        cout << "Start selected at " << cell_index_x << ", " << cell_index_y << endl;
-
-        cout << CELL_SIZE << ", " << m_maze_generator.get_cell_size() << endl; // check is block size matches        
+        //cout << "Start selected at " << cell_index_x << ", " << cell_index_y << endl;
+        //cout << CELL_SIZE << ", " << m_maze_generator.get_cell_size() << endl; // check is block size matches        
 
         return;
     }
 
-    // wall avoiding will be figured later
+    
 
     if (!m_selected_end)
     {
-        if (cell_index_x == m_start_pos.first && cell_index_y == m_start_pos.second)
+        if (cell_index_y == m_start_pos.first && cell_index_x == m_start_pos.second)
         {
-            cout << "End position cannot match start position." << endl;
+            //cout << "End position cannot match start position." << endl;
             return;
         }
 
         else
         {
             m_end_pos = make_pair(cell_index_y, cell_index_x);
-
             m_selected_end = true;
 
-            //cout << "End selected at " << cell_index_x << ", " << cell_index_y << endl;            
-            
-            solve_maze(m_start_pos.first, m_start_pos.second, m_end_pos.first, m_end_pos.second);
-           
+            //cout << "End selected at " << cell_index_y << ", " << cell_index_x << endl;            
+            solve_maze(m_start_pos.first, m_start_pos.second, m_end_pos.first, m_end_pos.second);                      
 
             return;
         }

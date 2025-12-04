@@ -106,19 +106,19 @@ void MazeGenerator::run_maze_gen(sf::RenderWindow& window)
         }
         if (!window.isOpen()) break; // break on window close
 
-        auto current = m_cell_stack.top(); // take the top of the stack
-        auto neighbors = get_unvisited_neighbors(current.first, current.second); // find its neighbors(if it has any)
+        auto current_cell = m_cell_stack.top(); // take the top of the stack
+        auto neighbors = get_unvisited_neighbors(current_cell.first, current_cell.second); // find its neighbors(if it has any)
 
         if (!neighbors.empty())
         {
-            auto new_cell = pick_random_neighbor(neighbors); // if it has - pick one at random
+            auto next_cell = pick_random_neighbor(neighbors); // if it has - pick one at random
 
-            m_visited[new_cell.first][new_cell.second] = true; // mark it as visited int the "ledger" array
+            m_visited[next_cell.first][next_cell.second] = true; // mark it as visited int the "ledger" array
 
             // remove wall logic 
-            remove_wall(current.first, current.second, new_cell.first, new_cell.second);
+            remove_wall(current_cell.first, current_cell.second, next_cell.first, next_cell.second);
 
-            m_cell_stack.push(new_cell); // push the new cell on top
+            m_cell_stack.push(next_cell); // push the new cell on top
 
 
             // draw logic
@@ -332,7 +332,7 @@ MazeSolver::MazeSolver(MazeGenerator& maze_gen, int cell_size) :
 }
 
 
-void MazeSolver::solve_maze(int start_y, int start_x, int end_y, int end_x)
+void MazeSolver::solve_maze(int start_y, int start_x, int end_y, int end_x) // BFS
 {
     while (!m_hose.empty()) m_hose.pop();
     m_wet_areas.clear();
@@ -442,8 +442,7 @@ void MazeSolver::print_cells_bitmasks(const auto& maze_cells)
 
 void MazeSolver::flood_paths(sf::RenderWindow& window)
 {
-    //std::cout << "Drawing " << m_wet_areas.size() << " wet cells" << std::endl;
-
+    
     int nudge = CELL_SIZE / 10;
     int visual_offset = CELL_SIZE / 3;
 
@@ -559,10 +558,7 @@ void MazeSolver::set_selection(int y, int x, sf::RenderWindow& window)
     {
         m_selected_start = true;
         m_start_pos = make_pair(cell_index_y, cell_index_x);
-
-        //cout << "Start selected at " << cell_index_x << ", " << cell_index_y << endl;
-        //cout << CELL_SIZE << ", " << m_maze_generator.get_cell_size() << endl; // check is block size matches        
-
+                
         return;
     }
 
@@ -602,9 +598,7 @@ void MazeSolver::redraw_start(sf::RenderWindow& window)
     entrance.setFillColor({ 0, 255, 0 });
     entrance.setOutlineThickness(4);
     entrance.setOutlineColor(sf::Color::Yellow);
-    window.draw(entrance);
-
-    //if(m_selected_end) m_selected_start = !m_selected_start;
+    window.draw(entrance);    
 }
 
 
@@ -619,10 +613,8 @@ void MazeSolver::redraw_end(sf::RenderWindow& window)
         static_cast<float>(m_end_pos.first * CELL_SIZE + CELL_SIZE / 3));
 
     exit.setPosition(exit_pos);
-    exit.setFillColor({ 0, 0, 255 });
+    exit.setFillColor({ 0, 255, 0 });
     exit.setOutlineThickness(4);
-    exit.setOutlineColor(sf::Color::Red);
-    window.draw(exit);
-
-    //if (!m_selected_start) m_selected_end = !m_selected_end;
+    exit.setOutlineColor(sf::Color::White);
+    window.draw(exit);    
 }
